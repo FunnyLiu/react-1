@@ -485,7 +485,9 @@ function updateMemoComponent(
     // Default to shallow comparison
     let compare = Component.compare;
     compare = compare !== null ? compare : shallowEqual;
+    // 如果两次props相等
     if (compare(prevProps, nextProps) && current.ref === workInProgress.ref) {
+      //直接返回，不再进行下面的fiber操作。
       return bailoutOnAlreadyFinishedWork(current, workInProgress, renderLanes);
     }
   }
@@ -1273,6 +1275,7 @@ function mountLazyComponent(
   updateLanes,
   renderLanes,
 ) {
+  //lazy组件只有在第一次渲染的时候才会调用该方法，等到组件已经加载完成了，就会走直接更新组件的流程
   if (_current !== null) {
     // A lazy component only mounts if it suspended inside a non-
     // concurrent tree, in an inconsistent state. We want to treat it like
@@ -1288,6 +1291,7 @@ function mountLazyComponent(
   const lazyComponent: LazyComponentType<any, any> = elementType;
   const payload = lazyComponent._payload;
   const init = lazyComponent._init;
+  //初始化组件
   let Component = init(payload);
   // Store the unwrapped component in the type.
   workInProgress.type = Component;
@@ -3105,7 +3109,7 @@ export function markWorkInProgressReceivedUpdate() {
 export function checkIfWorkInProgressReceivedUpdate() {
   return didReceiveUpdate;
 }
-
+//暂停后续工作，直接返回当前的节点组件
 function bailoutOnAlreadyFinishedWork(
   current: Fiber | null,
   workInProgress: Fiber,
@@ -3504,6 +3508,7 @@ function beginWork(
         renderLanes,
       );
     }
+    //如果是lazy组件的话，走单独的流程
     case LazyComponent: {
       const elementType = workInProgress.elementType;
       return mountLazyComponent(
@@ -3598,6 +3603,7 @@ function beginWork(
         }
       }
       resolvedProps = resolveDefaultProps(type.type, resolvedProps);
+      //Memo组件会去走这个逻辑
       return updateMemoComponent(
         current,
         workInProgress,

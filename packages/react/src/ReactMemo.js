@@ -8,7 +8,7 @@
 import {REACT_MEMO_TYPE} from 'shared/ReactSymbols';
 
 import isValidElementType from 'shared/isValidElementType';
-
+//React.memo的实现
 export function memo<Props>(
   type: React$ElementType,
   compare?: (oldProps: Props, newProps: Props) => boolean,
@@ -22,6 +22,7 @@ export function memo<Props>(
       );
     }
   }
+  //相当于带上了一个标识的type
   const elementType = {
     $$typeof: REACT_MEMO_TYPE,
     type,

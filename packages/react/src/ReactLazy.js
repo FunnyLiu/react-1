@@ -52,6 +52,7 @@ function lazyInitializer<T>(payload: Payload<T>): T {
   if (payload._status === Uninitialized) {
     const ctor = payload._result;
     const thenable = ctor();
+    //执行
     // Transition to the next state.
     const pending: PendingPayload = (payload: any);
     pending._status = Pending;
@@ -94,16 +95,17 @@ function lazyInitializer<T>(payload: Payload<T>): T {
     throw payload._result;
   }
 }
-
+//React.Lazy实现
 export function lazy<T>(
   ctor: () => Thenable<{default: T, ...}>,
 ): LazyComponent<T, Payload<T>> {
   const payload: Payload<T> = {
     // We use these fields to store the result.
+    //用来标记
     _status: -1,
     _result: ctor,
   };
-
+  //增加标识位
   const lazyType: LazyComponent<T, Payload<T>> = {
     $$typeof: REACT_LAZY_TYPE,
     _payload: payload,
