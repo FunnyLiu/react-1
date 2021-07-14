@@ -111,6 +111,27 @@ export function lazy<T>(
 
 
 
+
+
+### vue的re-render和React的re-render的区别？
+
+Vue2通过主动记录数据依赖，可以精确到某个组件开始及其子组件的re-render;
+
+Vue3进一步优化到模板中区分静态节点和动态节点，只re-render动态节点；
+
+而React则是每次改变状态后对整个APP进行重新diff并查到需要render的组件，重新执行render。
+
+### this.setState做了什么？
+
+入口在[笔记内容](https://github.com/FunnyLiu/react-1/blob/readsource/packages/react/src/ReactBaseClasses.js#L57)。
+
+而实际上是调用的[笔记内容](https://github.com/FunnyLiu/react-1/blob/readsource/packages/react-reconciler/src/ReactFiberClassComponent.new.js#L205)
+
+接下来进入了任务调度系统：[笔记内容](https://github.com/FunnyLiu/react-1/blob/readsource/packages/react-reconciler/src/ReactFiberWorkLoop.new.js#L465)
+
+最后进入渲染整个root的流程：[笔记内容](https://github.com/FunnyLiu/react-1/blob/readsource/packages/react-reconciler/src/ReactFiberWorkLoop.new.js#L1409)。并调用workLoop进行循环单元更新。
+
+
 # [React](https://reactjs.org/) &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/facebook/react/blob/master/LICENSE) [![npm version](https://img.shields.io/npm/v/react.svg?style=flat)](https://www.npmjs.com/package/react) [![CircleCI Status](https://circleci.com/gh/facebook/react.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/facebook/react) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://reactjs.org/docs/how-to-contribute.html#your-first-pull-request)
 
 React is a JavaScript library for building user interfaces.

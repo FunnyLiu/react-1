@@ -54,6 +54,7 @@ Component.prototype.isReactComponent = {};
  * @final
  * @protected
  */
+//this.setState具体的执行逻辑
 Component.prototype.setState = function(partialState, callback) {
   invariant(
     typeof partialState === 'object' ||

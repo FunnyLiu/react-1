@@ -462,16 +462,23 @@ function requestRetryLane(fiber: Fiber) {
 
   return claimNextRetryLane();
 }
-
+//任务调度
 export function scheduleUpdateOnFiber(
   fiber: Fiber,
   lane: Lane,
   eventTime: number,
 ): FiberRoot | null {
+  //判断是否是无限循环update
   checkForNestedUpdates();
   warnAboutRenderPhaseUpdatesInDEV(fiber);
+  //找到rootFiber并遍历更新子节点的expirationTime
+  //markUpdateTimeFromFiberToRoot()主要做了以下事情
+  //（1）更新fiber对象的expirationTime
+  //（2）根据fiber.return向上遍历寻找RootFiber（fiber的顶层对象）
+  //（3）在向上遍历的过程中，更新父对象fiber.return子节点的childExpirationTime
 
   const root = markUpdateLaneFromFiberToRoot(fiber, lane);
+
   if (root === null) {
     warnAboutUpdateOnUnmountedFiberInDEV(fiber);
     return null;
@@ -1399,7 +1406,8 @@ export function renderHasNotSuspendedYet(): boolean {
   // so those are false.
   return workInProgressRootExitStatus === RootIncomplete;
 }
-
+//渲染root的流程
+//初始化root，并调用workLoop进行循环单元更新
 function renderRootSync(root: FiberRoot, lanes: Lanes) {
   const prevExecutionContext = executionContext;
   executionContext |= RenderContext;
@@ -1547,21 +1555,26 @@ function renderRootConcurrent(root: FiberRoot, lanes: Lanes) {
 /** @noinline */
 function workLoopConcurrent() {
   // Perform work until Scheduler asks us to yield
+  //循环执行performUnitOfWork并赋值给workInProgress，直到workInProgress值为空，则中止循环
   while (workInProgress !== null && !shouldYield()) {
     performUnitOfWork(workInProgress);
   }
 }
-
+//一直执行
+//调用beginWork，从父至子，进行组件（节点）更新；
+//调用completeUnitOfWork，从子至父，根据 effectTag，对节点进行一些处理
 function performUnitOfWork(unitOfWork: Fiber): void {
   // The current, flushed, state of this fiber is the alternate. Ideally
   // nothing should rely on this, but relying on it here means that we don't
   // need an additional field on the work in progress.
+  //获取当前节点
   const current = unitOfWork.alternate;
   setCurrentDebugFiberInDEV(unitOfWork);
 
   let next;
   if (enableProfilerTimer && (unitOfWork.mode & ProfileMode) !== NoMode) {
     startProfilerTimer(unitOfWork);
+    //判断fiber有无更新，有更新则进行相应的组件更新，无更新则复制节点
     next = beginWork(current, unitOfWork, subtreeRenderLanes);
     stopProfilerTimerIfRunningAndRecordDelta(unitOfWork, true);
   } else {
