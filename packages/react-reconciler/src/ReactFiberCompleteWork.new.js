@@ -778,7 +778,7 @@ function bubbleProperties(completedWork: Fiber) {
 
   return didBailout;
 }
-
+// 类似beginWork，completeWork也是针对不同fiber.tag调用不同的处理逻辑。
 function completeWork(
   current: Fiber | null,
   workInProgress: Fiber,
@@ -842,11 +842,14 @@ function completeWork(
       bubbleProperties(workInProgress);
       return null;
     }
+    // 原生DOM组件对应的Fiber节点
     case HostComponent: {
       popHostContext(workInProgress);
       const rootContainerInstance = getRootHostContainer();
       const type = workInProgress.type;
       if (current !== null && workInProgress.stateNode != null) {
+        // update的情况
+        // 当update时，Fiber节点已经存在对应DOM节点，所以不需要生成DOM节点。需要做的主要是处理props
         updateHostComponent(
           current,
           workInProgress,
@@ -859,6 +862,7 @@ function completeWork(
           markRef(workInProgress);
         }
       } else {
+        // mount的情况
         if (!newProps) {
           invariant(
             workInProgress.stateNode !== null,

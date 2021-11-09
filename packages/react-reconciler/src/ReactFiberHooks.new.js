@@ -1270,7 +1270,7 @@ function rerenderState<S>(
 ): [S, Dispatch<BasicStateAction<S>>] {
   return rerenderReducer(basicStateReducer, (initialState: any));
 }
-
+// useEffect的创建过程
 function pushEffect(tag, create, destroy, deps) {
   const effect: Effect = {
     tag,

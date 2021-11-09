@@ -249,7 +249,10 @@ if (__DEV__) {
   didWarnAboutTailOptions = {};
   didWarnAboutDefaultPropsOnFunctionComponent = {};
 }
+// Reconciler模块的核心部分
+//对于mount的组件，他会创建新的子Fiber节点
 
+//对于update的组件，他会将当前组件与该组件在上次更新时对应的Fiber节点比较（也就是俗称的Diff算法），将比较的结果生成新Fiber节点
 export function reconcileChildren(
   current: Fiber | null,
   workInProgress: Fiber,
@@ -261,6 +264,7 @@ export function reconcileChildren(
     // won't update its child set by applying minimal side-effects. Instead,
     // we will add them all to the child before it gets rendered. That means
     // we can optimize this reconciliation pass by not tracking side-effects.
+    // 对于mount的组件
     workInProgress.child = mountChildFibers(
       workInProgress,
       null,
@@ -274,6 +278,7 @@ export function reconcileChildren(
 
     // If we had any progressed work already, that is invalid at this point so
     // let's throw it out.
+    // 对于update的组件
     workInProgress.child = reconcileChildFibers(
       workInProgress,
       current.child,
@@ -3211,10 +3216,13 @@ function remountFiber(
     );
   }
 }
-
+// beginWork的工作是传入当前Fiber节点，创建子Fiber节点。
 function beginWork(
+  //当前组件对应的Fiber节点在上一次更新时的Fiber节点，即workInProgress.alternate
   current: Fiber | null,
+  // 当前组件对应的Fiber节点
   workInProgress: Fiber,
+  // 优先级相关
   renderLanes: Lanes,
 ): Fiber | null {
   let updateLanes = workInProgress.lanes;
@@ -3236,7 +3244,8 @@ function beginWork(
       );
     }
   }
-
+  // 通过current === null ?来区分组件是处于mount还是update
+  // // update时：如果current存在可能存在优化路径，可以复用current（即上一次更新的Fiber节点）
   if (current !== null) {
     // TODO: The factoring of this block is weird.
     if (
@@ -3266,6 +3275,7 @@ function beginWork(
       // This fiber does not have any pending work. Bailout without entering
       // the begin phase. There's still some bookkeeping we that needs to be done
       // in this optimized path, mostly pushing stuff onto the stack.
+      // mount时：根据tag不同，创建不同的子Fiber节点
       switch (workInProgress.tag) {
         case HostRoot:
           pushHostRootContext(workInProgress);

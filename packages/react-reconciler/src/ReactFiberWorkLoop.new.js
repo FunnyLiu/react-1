@@ -1698,7 +1698,7 @@ function commitRoot(root) {
 
   return null;
 }
-
+// commit阶段的完整工作
 function commitRootImpl(root, renderPriorityLevel) {
   do {
     // `flushPassiveEffects` will call `flushSyncUpdateQueue` at the end, which
@@ -1707,6 +1707,8 @@ function commitRootImpl(root, renderPriorityLevel) {
     // no more pending effects.
     // TODO: Might be better if `flushPassiveEffects` did not automatically
     // flush synchronous work at the end, to avoid factoring hazards like this.
+    // 触发useEffect回调与其他同步任务。
+    // 由于这些任务可能触发新的渲染，所以这里要一直遍历执行直到没有任务
     flushPassiveEffects();
   } while (rootWithPendingPassiveEffects !== null);
   flushRenderPhaseStrictModeWarningsInDEV();
@@ -1717,6 +1719,7 @@ function commitRootImpl(root, renderPriorityLevel) {
   );
 
   const finishedWork = root.finishedWork;
+  // 凡是变量名带lane的都是优先级相关
   const lanes = root.finishedLanes;
 
   if (__DEV__) {
@@ -1902,9 +1905,9 @@ function commitRootImpl(root, renderPriorityLevel) {
       recordCommitTime();
     }
   }
-
+  // layout之后
   const rootDidHavePassiveEffects = rootDoesHavePassiveEffects;
-
+  // useEffect相关
   if (rootDoesHavePassiveEffects) {
     // This commit has passive effects. Stash a reference to them. But don't
     // schedule a callback until after flushing layout work.
@@ -1921,6 +1924,7 @@ function commitRootImpl(root, renderPriorityLevel) {
   remainingLanes = root.pendingLanes;
 
   // Check if there's remaining work on this root
+  // 性能优化相关
   if (remainingLanes !== NoLanes) {
     if (enableSchedulerTracing) {
       if (spawnedWorkDuringRender !== null) {
@@ -1947,7 +1951,7 @@ function commitRootImpl(root, renderPriorityLevel) {
       commitDoubleInvokeEffectsInDEV(root.current, false);
     }
   }
-
+// 性能优化相关
   if (enableSchedulerTracing) {
     if (!rootDidHavePassiveEffects) {
       // If there are no passive effects, then we can complete the pending interactions.
