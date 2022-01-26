@@ -598,6 +598,8 @@ useReducer
 
 在真实的Hooks中，组件mount时的hook与update时的hook来源于不同的对象，这类对象在源码中被称为dispatcher。
 
+hooks是通过单链表存储的。
+
 ``` js
 // mount时的Dispatcher
 const HooksDispatcherOnMount: Dispatcher = {
@@ -658,6 +660,20 @@ useMemo：对于useMemo(callback, [depA])，memoizedState保存[callback(), depA
 
 useCallback：对于useCallback(callback, [depA])，memoizedState保存[callback, depA]。与useMemo的区别是，useCallback保存的是callback函数本身，而useMemo保存的是callback函数的执行结果
 
+
+### hooks为什么用单链表存储而不是数组？
+
+首先说明下，react的hook是单链表的结构，而fre的hook则是数组结构。数组结构和单链表结构可以实现hook。
+
+但是我们在选择数据结构的时候需要考虑场景，hook的场景需要的是顺序访问，不需要随机访问；链表面对插入的场景，复杂度更低；数组会存在爆栈的隐患，而链表不会。
+
+根据132的介绍，hook用数组更好，effectlist和fiber用链表更好，因为hook不需要插入、也不会出现量大到爆栈的情况，而react团队当年是能不用数组就不用数组的政治正确。
+
+### hook为什么不能在条件判断中使用？
+
+hook无论用数组还是链表，都无法解决这个问题，因为hook只初始化一次，但需要执行多次。if-else会干扰初始化的顺序。
+
+而vue3的就没有这个问题，因为vue3不需要反复执行，所以顺序不会发生变化。
 
 ### useState和useReducer的实现
 
